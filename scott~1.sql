@@ -81,7 +81,332 @@ FROM
 --사원들의 1년 연봉 구하기 (sal*12+comm)
 SELECT
     empno,
-    ename 사원명, job "직 책",
+    ename           사원명,
+    job             "직 책",
     sal * 12 + comm AS annsal
 FROM
     emp;
+    
+--8. 순서: ORDER BY
+--        오름차순: ASC 내림차순: DESC
+
+--ENAME, SAL 열 추출하고 SAL 내림차순 정렬
+SELECT
+    ename,
+    sal
+FROM
+    emp
+ORDER BY
+    sal DESC;
+
+SELECT
+    ename,
+    sal
+FROM
+    emp
+ORDER BY
+    sal ASC;
+    
+--전체 내용 출력하고, 결과가 사원번호의 오름차순으로 정렬
+SELECT
+    *
+FROM
+    emp
+ORDER BY
+    empno;
+
+SELECT
+    *
+FROM
+    emp
+ORDER BY
+    deptno,
+    sal DESC;
+    
+--[실습] emp테이블의 모든 열 출력
+--empno =>employee_no
+--enmae => employee_name
+--mor ->manager
+--sal => salary
+--comm=>commission
+--deptno => department_no
+--부서 번호를 기준으로 내림차순으로 정렬하되 부서번호가 같다면 사원이름 기준으로 오름차순
+SELECT
+    empno  AS employee_no,
+    ename  AS employee_name,
+    mgr    AS manager,
+    sal    AS salary,
+    comm   AS commission,
+    deptno AS department_no
+FROM
+    emp
+ORDER BY
+    deptno DESC,
+    ename ASC;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    deptno = 30;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    empno = 7782;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+        deptno = 30
+    AND job = 'SALESMAN';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+        empno = 7499
+    AND deptno = 30;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    deptno = 30
+    OR job = 'CLERK';
+
+
+--산술연산자: +,-,*,/mod()
+--비교연산자:>, >=, <, <=
+--등가비교연산자: = ,!=, <>, ^=
+--논리부정연산자: NOT
+--IN연산자
+--BETWEEN A AND B 연산자
+--LIKE연산자와 와일드카드
+--IS NULL 연산자
+--집합 연산자: UNION(합집합-중복제거),UNION ALL(합집합-중복보함),MINUS(차집합),INTERSECT(교집합)
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal * 12 = 36000;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    ename >= 'F';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    job = 'MANAGER'
+    OR job = 'SALESMAN'
+    OR job = 'CLERK';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal != 3000;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+        job != 'MANAGER'
+    AND job <> 'SALESMAN'
+    AND job^= 'CLERK';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    deptno IN ( 10, 20 );
+
+--LIKE연산자와 와일드카드(_,%)
+--_ : 어떤 값이든 상관없이 한 개의 문자 데이터를 의미
+--% : 길이와 상관없이 모든 문자 데이터를 의미
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    ename LIKE 'S%';
+
+--사원 이름의 두번째 글자가 L인 사원 조회
+SELECT
+    *
+FROM
+    emp
+WHERE
+    ename LIKE '_L%';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    comm IS NULL;
+
+--union(동일한 결과값인 겨우 중복 제거),union all(중복제거 안함)
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10
+UNION
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10;
+
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10
+UNION ALL
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10;
+
+--minus(차집합)
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+MINUS
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10;
+
+--insersect(교집합)
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+INTERSECT
+SELECT
+    empno,
+    ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno = 10;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    ename LIKE '%S';
+
+SELECT
+    deptno,
+    ename,
+    sal
+FROM
+    emp
+WHERE
+        deptno = 30
+    AND job = 'SALESMAN'
+    order by sal desc;
+
+SELECT
+    empno ename,
+    sal,
+    deptno
+FROM
+    emp
+WHERE
+    deptno IN ( 20, 30 )
+    AND sal > 2000;
+
+SELECT
+    empno,
+    sal,
+    deptno,
+    ename
+FROM
+    emp
+WHERE
+    ename LIKE '%E%'
+    AND deptno = 30
+    AND sal not BETWEEN 1000 AND 2000;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    comm IS NULL
+    and mgr is not null
+    AND job IN ( 'MANAGER', 'CLERK' )
+    AND ename NOT LIKE '_L%';
+    
+
+
+--오라클 함수
+--UPPER,LOWER,INITCAP
+
+--SUBSTR(문자열 데이터, 시작위치,추출길이): 추출길이 생략 가능
+
+SELECT ENAME, SUBSTR(ENAME,3)
+FROM EMP;
+
+--|| : 문자열 연결 연산자
+SELECT EMPNO || ENAME, EMPNO || ':' || ENAME
+FROM EMP;
+
+    
+    
