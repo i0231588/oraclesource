@@ -360,7 +360,8 @@ FROM
 WHERE
         deptno = 30
     AND job = 'SALESMAN'
-    order by sal desc;
+ORDER BY
+    sal DESC;
 
 SELECT
     empno ename,
@@ -382,7 +383,7 @@ FROM
 WHERE
     ename LIKE '%E%'
     AND deptno = 30
-    AND sal not BETWEEN 1000 AND 2000;
+    AND sal NOT BETWEEN 1000 AND 2000;
 
 SELECT
     *
@@ -390,7 +391,7 @@ FROM
     emp
 WHERE
     comm IS NULL
-    and mgr is not null
+    AND mgr IS NOT NULL
     AND job IN ( 'MANAGER', 'CLERK' )
     AND ename NOT LIKE '_L%';
     
@@ -401,12 +402,218 @@ WHERE
 
 --SUBSTR(문자열 데이터, 시작위치,추출길이): 추출길이 생략 가능
 
-SELECT ENAME, SUBSTR(ENAME,3)
-FROM EMP;
+SELECT
+    ename,
+    substr(ename, 3)
+FROM
+    emp;
 
 --|| : 문자열 연결 연산자
-SELECT EMPNO || ENAME, EMPNO || ':' || ENAME
-FROM EMP;
+SELECT
+    empno || ename,
+    empno
+    || ':'
+    || ename
+FROM
+    emp;
 
+--CEIL(숫자), FLOOR(숫자): 입력된 숫자와 가까운 큰 정수, 작은 정수
+
+--SYSDATE 함수
+--SYSDATE -1 => YESTERDAY
+--SYSDATE +1 => TOMORROW
+
+--ADD_MONTHS(날짜, 더할 개월 수): 몇개월 이후 날짜 구하기
+SELECT
+    sysdate,
+    add_months(sysdate, 3)
+FROM
+    dual;
+
+--50주년 되는 날짜 구하기
+SELECT
+    empno,
+    ename,
+    add_months(hiredate, 600)
+FROM
+    emp;
+
+--MONTHS_BETWEEN(첫번째 날짜, 두번째 날짜) : 두 날짜 데이터 간의 날짜 차이를 개월수로 계산하여 출력
+--입사 45년 미만인 사원데이터 조회
+SELECT
+    empno,
+    ename,
+    hiredate
+FROM
+    emp
+WHERE
+    months_between(sysdate, hiredate) < 540;
+
+--현재 날짜와 6개월 후 날짜
+SELECT
+    sysdate,
+    add_months(sysdate, 6)
+FROM
+    dual;
+
+--NEXT_DAY(날짜,요일): 특정 날짜를 기준으로 돌아오는 요일의 날짜 출력
+--LAST_DAY(날짜) : 특정 날짜가 속한 달의 마지막 날짜를 출력
+SELECT
+    sysdate,
+    next_day(sysdate, '금요일'),
+    last_day(sysdate)
+FROM
+    dual;
+
+--DECODE 함수
+SELECT
+    empno,
+    ename,
+    job,
+    sal,
+    decode(job, 'MANAGER', sal * 1.1, 'SALESMAN', sal * 1.05,
+           'ANALYST', sal, sal * 1.03) AS upsal
+FROM
+    emp;
+
+SELECT
+    employee_id,
+    ename,
+    sal,
+    trunk(sal / 21.5)        AS day_pay,
+    round(sal / 21.5 / 8, 1) AS time_pay
+FROM
+    emp;
+
+SELECT
+    empno,
+    ename,
+    hiredate,
+    next_day(add_months(hiredate, 3), '월요일') AS r_job,
+    nvl(to_char(comm), 'N/A')                AS comm --COMM이 NULL이면 'N.A'로 출력해줘
+FROM
+    emp
+WHERE
+    comm IS NULL;
+    
+--    
+--SELECT EMPNO, ENAME, MGR, DECODE(MGR,'75%',0000,'76%',6666,'77%',7777,'78%',8888,NULL,0000,ELSE,MGR)AS CHG_MGR
+--FROM EMP;
+
+SELECT
+    empno,
+    ename,
+    mgr,
+    decode(substr(to_char(mgr), 1, 2), NULL, '0000', '75', '5555',
+           '76', '6666', '77', '7777', '78',
+           '8888', substr(to_char(mgr), 1)) AS chg_mgr
+FROM
+    emp;
     
     
+    
+--다중행 함수
+SELECT
+    SUM(sal)
+FROM
+    emp;
+
+SELECT
+    SUM(DISTINCT sal),
+    SUM(ALL sal),
+    SUM(sal)
+FROM
+    emp;
+
+SELECT
+    SUM(comm)
+FROM
+    emp;
+
+SELECT
+    COUNT(sal)
+FROM
+    emp;
+
+SELECT
+    COUNT(comm)
+FROM
+    emp;
+
+SELECT
+    MAX(sal)
+FROM
+    emp;
+
+SELECT
+    deptno,
+    AVG(comm)
+FROM
+    emp
+GROUP BY
+    deptno;
+
+--GROUP BY + HAVING: GROUP BY 절에 조건을 줄 때
+--HAVING : 그룹화된 대상을 출력 제한할 때
+SELECT
+    deptno,
+    job,
+    AVG(sal)
+FROM
+    emp
+GROUP BY
+    deptno,
+    job
+HAVING
+    AVG(sal) >= 2000
+ORDER BY
+    deptno,
+    job;
+
+SELECT
+    deptno,
+    job,
+    AVG(sal)
+FROM
+    emp
+WHERE
+    AVG(sal) >= 2000
+GROUP BY
+    deptno,
+    job
+ORDER BY
+    deptno,
+    job;
+
+SELECT
+    deptno,
+    floor(AVG(sal)),
+    MAX(sal),
+    MIN(sal),
+    COUNT(deptno)
+FROM
+    emp
+GROUP BY
+    deptno;
+
+SELECT
+    job,
+    COUNT(*)
+FROM
+    emp
+GROUP BY
+    job
+HAVING
+    COUNT(job) >= 3;
+
+SELECT
+    to_char(hiredate, 'YYYY'),
+    deptno,
+    COUNT(*)
+FROM
+    emp
+GROUP BY
+    to_char(hiredate, 'YYYY'),
+    deptno
+
+
