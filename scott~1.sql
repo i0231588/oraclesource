@@ -614,6 +614,262 @@ FROM
     emp
 GROUP BY
     to_char(hiredate, 'YYYY'),
-    deptno
+    deptno;
+
+--조인: 여러 테이블을 하나의 테이블처럼 사용
+--1) 내부조인(inner join) : 여러개의 테이블에서 공통된 부분만 추출
+--          1) 등가조인: 두개의 열이 일치할 때 값 추출
+--          2) 비등가조인 : 범위에 해당할 떄 값 추출
+
+--2) 외부조인(outer join)
+--           1)left outer join
+--           2)right outer join
+--           3)full outer join
+
+--dept: 4행, emp : 12행 ==> 4*12=48행
+--크로스 조인(나올 수 있는 모든 조합 추출)
+
+--inner join
+SELECT
+    e.empno,
+    e.ename,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+    emp  e,
+    dept d
+WHERE
+    e.deptno = d.deptno;
 
 
+--SQL-99
+--JOIN~ON
+SELECT
+    e.empno,
+    e.ename,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno;
+
+SELECT
+    e.empno,
+    e.ename,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+    emp  e,
+    dept d
+WHERE
+        e.deptno = d.deptno
+    AND sal >= 3000;
+
+--SQL-99
+--JOIN~ON
+SELECT
+    e.empno,
+    e.ename,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+    sal >= 3000;
+
+SELECT
+    e.empno,
+    e.ename,
+    e.sal,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+    emp  e,
+    dept d
+WHERE
+        e.deptno = d.deptno
+    AND sal <= 2500
+    AND e.empno <= 9999;
+
+--SQL-99
+--JOIN~ON
+SELECT
+    e.empno,
+    e.ename,
+    e.sal,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+        e.sal <= 2500
+    AND e.empno <= 9999;
+
+SELECT
+    *
+FROM
+    emp      e,
+    salgrade s
+WHERE
+    e.sal BETWEEN s.losal AND s.hisal;
+
+--SQL-99
+--JOIN~ON
+SELECT
+    *
+FROM
+         emp e
+    JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal;
+
+
+
+--self join: 자기 자신 테이블과 조인
+
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1,
+    emp e2
+WHERE
+    e1.mgr = e2.empno;
+
+--left outer join -> 오른쪽에 + 붙이기
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1,
+    emp e2
+WHERE
+    e1.mgr = e2.empno (+);
+
+--right outer join -> 왼쪽에 + 붙이기
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1,
+    emp e2
+WHERE
+    e1.mgr (+) = e2.empno;
+
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1,
+    emp e2
+WHERE
+    e1.mgr (+) = e2.empno (+);
+
+
+--SQL-99
+--JOIN~ON
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1
+    LEFT OUTER JOIN emp e2 ON e1.mgr = e2.empno;
+
+SELECT
+    e1.empno,
+    e1.ename,
+    e1.mgr,
+    e2.empno
+FROM
+    emp e1
+    RIGHT OUTER JOIN emp e2 ON e1.mgr = e2.empno;
+
+--연결해야할 테이블이 세 개일 때
+
+--select *
+--from table1 t1, table2 t2,table3 t3
+--where t1.empno = t2.empno and t2.deptno = t3.deptno;
+--
+--select *
+--from table1 t1 join table2 t2 on t1.empno = t2.empno table3 t3
+--where t1.empno = t2.empno and t2.deptno = t3.deptno;
+
+SELECT
+    d.deptno,
+    d.dname,
+    e.empno,
+    e.ename,
+    e.sal
+FROM
+    emp  e,
+    dept d
+WHERE
+        e.deptno = d.deptno
+    AND e.sal > 2000;
+
+
+
+SELECT
+    d.deptno,
+    d.dname,
+    e.empno,
+    e.ename,
+    e.sal
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+    e.sal > 2000;
+
+
+
+
+SELECT
+    d.deptno,
+    d.dname,
+    AVG(sal),
+    MAX(sal),
+    MIN(sal),
+    COUNT(*)
+FROM
+    emp  e,
+    dept d
+WHERE
+    e.deptno = d.deptno
+GROUP BY
+    d.deptno,
+    d.dname;
+
+
+
+SELECT
+    d.deptno,
+    d.dname,
+    e.empno,
+    e.ename,
+    e.job,
+    e.sal
+FROM
+    dept d,
+    emp  e
+WHERE
+    d.deptno = e.deptno (+)
+ORDER BY
+    d.deptno,
+    e.ename;

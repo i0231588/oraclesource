@@ -206,9 +206,122 @@ FROM
     employees
 WHERE
     department_id = 80;
-    
-SELECT MAX(SALARY)-MIN(SALARY)
-FROM employees;
 
-SELECT COUNT(DISTINCT MANAGER_ID)
-FROM employees;
+SELECT
+    MAX(salary) - MIN(salary)
+FROM
+    employees;
+
+SELECT
+    COUNT(DISTINCT manager_id)
+FROM
+    employees;
+
+
+
+--join
+SELECT
+    e1.hire_date,
+    e1.last_name,
+    e1.manager_id
+FROM
+    employees e1,
+    employees e2
+WHERE
+        e1.manager_id = e2.employee_id
+    AND e1.hire_date < e2.hire_date;
+
+SELECT
+    e.employee_id,
+    e.last_name,
+    d.department_id,
+    l.city
+FROM
+    employees   e,
+    departments d,
+    locations   l
+WHERE
+        e.department_id = d.department_id
+    AND d.location_id = l.location_id
+    AND city LIKE 'T%';
+
+SELECT
+    e.employee_id,
+    e.last_name,
+    e.department_id,
+    e.salary
+FROM
+    employees   e,
+    departments d
+WHERE
+        d.department_id = e.department_id
+    AND d.location_id = 1700;
+
+SELECT
+    d.department_name,
+    d.location_id,
+    COUNT(e.employee_id),
+    trunc(AVG(e.salary), 2)
+FROM
+    departments d,
+    employees   e
+WHERE
+    d.department_id = e.department_id
+GROUP BY
+    d.department_name,
+    d.location_id;
+
+SELECT
+    e.department_id,
+    e.last_name,
+    e.job_id
+FROM
+    departments d,
+    employees   e
+WHERE
+        d.department_id = e.department_id
+    AND d.department_name = 'Executive';
+
+SELECT
+    DISTINCT e1.department_id,
+    e1.first_name
+    || ' '
+    || e1.last_name AS name,
+    e1.salary,
+    e1.hire_date
+FROM
+    employees e1,
+    employees e2
+WHERE
+        e1.department_id = e2.department_id
+    AND e1.hire_date < e2.hire_date
+    AND e1.salary < e2.salary;
+    
+
+
+
+
+select employee_id,last_name
+from employees
+where department_id = any(SELECT department_id from employees where last_name like '%u%');
+
+select last_name, job_id,salary
+from employees
+where salary > ANY(select salary from employees where job_id='SA_MAN');
+
+select last_name, department_id,salary
+from employees
+where salary = some(select salary from employees where commission_pct is not null);
+
+select  employee_id, last_name, salary
+from employees
+where job_id = any(select job_id from employees where last_name like '%u%') and salary>(select avg(salary) from employees);
+
+
+
+
+
+
+
+
+
