@@ -823,8 +823,6 @@ WHERE
         e.deptno = d.deptno
     AND e.sal > 2000;
 
-
-
 SELECT
     d.deptno,
     d.dname,
@@ -836,9 +834,6 @@ FROM
     JOIN dept d ON e.deptno = d.deptno
 WHERE
     e.sal > 2000;
-
-
-
 
 SELECT
     d.deptno,
@@ -856,8 +851,6 @@ GROUP BY
     d.deptno,
     d.dname;
 
-
-
 SELECT
     d.deptno,
     d.dname,
@@ -873,3 +866,651 @@ WHERE
 ORDER BY
     d.deptno,
     e.ename;
+    
+    
+--서브쿼리
+--sql문을 실행하는데 필요한 데이터를 추가로 조회하기 위해 sql문 내부에서 사용하는 select문
+    
+--select 조회할 열
+--from 테이블명
+--where 조건식(select 조회할 열 from 테이블 where조건식)
+
+--존스의 급여보다 높은 급여를 받는 사원 조회
+--jones 급여 알아내기 / 알아낸 jones 급여를 가지고 조건식
+
+SELECT
+    sal
+FROM
+    emp
+WHERE
+    ename = 'JONES';
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal > 2975;
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal > (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            ename = 'JONES'
+    );
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    hiredate > (
+        SELECT
+            hiredate
+        FROM
+            emp
+        WHERE
+            ename = 'WARD'
+    );
+
+SELECT
+    e.empno,
+    e.ename,
+    e.job,
+    e.sal,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+        e.deptno = 20
+    AND e.sal > (
+        SELECT
+            AVG(sal)
+        FROM
+            emp
+    );
+
+SELECT
+    e.empno,
+    e.ename,
+    e.job,
+    e.sal,
+    d.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+        e.deptno = 20
+    AND e.sal <= (
+        SELECT
+            AVG(sal)
+        FROM
+            emp
+    );
+
+--in : 메인쿼리 결과가 서브쿼리 결과 중 하나라도 일치하면 true;
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal IN (
+        SELECT
+            MAX(sal)
+        FROM
+            emp
+        GROUP BY
+            deptno
+    );
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal < ANY (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal < SOME (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
+
+--단일행 서브쿼리
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal > (
+        SELECT
+            MIN(sal)
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
+--다중행 서브쿼리
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal > ANY (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
+--all : 서브쿼리 모든 결과가 조건식에 맞아 떨어져야만 메인쿼리 조건식이 true
+SELECT
+    *
+FROM
+    emp
+WHERE
+    sal < ALL (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
+--exists : 서브쿼리에 결과 값이 하나 이상 존재하면 조건식이 모두 true
+SELECT
+    *
+FROM
+    emp
+WHERE
+    EXISTS (
+        SELECT
+            dname
+        FROM
+            dept
+        WHERE
+            deptno = 10
+    );
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    EXISTS (
+        SELECT
+            dname
+        FROM
+            dept
+        WHERE
+            deptno = 50
+    );--false
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    job = (
+        SELECT
+            job
+        FROM
+            emp
+        WHERE
+            ename = 'ALLEN'
+    );
+
+SELECT
+    *
+FROM
+    emp      e,
+    deot     d,
+    salgrade s
+WHERE
+        e.deptno = d.deptno
+    AND e.sal BETWEEN s.losal AND s.hisal
+    AND e.sal > (
+        SELECT
+            AVG(sal)
+        FROM
+            emp
+    )
+ORDER BY
+    e.sal DESC,
+    e.empno ASC;
+    
+    
+    
+--다중열 서브쿼리 : 서브쿼리의 select 절에 비교할 데이터를 여러개 지정
+SELECT
+    *
+FROM
+    emp
+WHERE
+    ( deptno, sal ) IN (
+        SELECT
+            deptno, MAX(sal)
+        FROM
+            emp
+        GROUP BY
+            deptno
+    );
+    
+--from 절에 사용하는 서브쿼리(인라인 뷰)
+--from 절에 직접 테이블을 명시해서 사용하기에는 테이블 내 데이터 규모가 클 때 불필요한 열이 많을 때
+SELECT
+    e10.empno,
+    e1.ename,
+    e10.deptno,
+    d.dname,
+    d.loc
+FROM
+    (
+        SELECT
+            *
+        FROM
+            emp
+        WHERE
+            deptno = 10
+    ) e10,
+    (
+        SELECT
+            *
+        FROM
+            dept
+    ) d
+WHERE
+    e10.deptno = d.deptno;
+
+--select 절에 사용하는 서브쿼리(스칼라 서브쿼리)
+--select 절에 사용하는 서브쿼리는 반드시 하나의 결과만 반환해야 함
+SELECT
+    empno,
+    ename,
+    job,
+    sal,
+    (
+        SELECT
+            grade
+        FROM
+            salgrade
+        WHERE
+            e.sal BETWEEN losal AND hisal
+    ) AS salgrade,
+    deptno,
+    (
+        SELECT
+            dname
+        FROM
+            dept
+        WHERE
+            e.deptno = dept.deptno
+    ) AS dname
+FROM
+    emp e;
+
+SELECT
+    e.empno,
+    e.ename,
+    e.job,
+    e.deptno,
+    d.dname,
+    d.loc
+FROM
+    emp  e,
+    dept d
+WHERE
+        e.deptno = d.deptno
+    AND e.job NOT IN (
+        SELECT
+            job
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    )
+    AND e.deptno = 10;
+
+--단일행
+SELECT
+    e.empno,
+    e.ename,
+    e.sal,
+    s.grade
+FROM
+    emp      e,
+    salgrade s
+WHERE
+    e.sal BETWEEN s.losal AND s.hisal
+    AND e.sal > ALL (
+        SELECT
+            MAX(sal)
+        FROM
+            emp
+        WHERE
+            job = 'SALESMAN'
+    )
+ORDER BY
+    e.empno;
+--다중행 (in,any,some,all,exists)
+
+
+--DML(Data Manipulation Language): 데이터 추가(INSERT),수정(UPDATE),삭제(DELETE)
+
+
+--연습용 테이블 생성
+CREATE TABLE dept_temp
+    AS
+        SELECT
+            *
+        FROM
+            dept;
+
+--insert into 테이블 이름(열이름1,열이름2...)
+--values( 데이터1,데이터2...)
+
+
+--dept_temp 새로운 부서 추가
+INSERT INTO dept_temp (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    50,
+    'WEB',
+    NULL
+);
+
+INSERT INTO dept_temp (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    70,
+    'MOBILE',
+    ''
+);
+
+INSERT INTO dept_temp (
+    deptno,
+    loc
+) VALUES (
+    91,
+    'INCHEON'
+);
+
+SELECT
+    *
+FROM
+    dept_temp;
+
+CREATE TABLE emp_temp
+    AS
+        SELECT
+            *
+        FROM
+            emp
+        WHERE
+            1 <> 1;
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    9999,
+    '홍길동',
+    'PRESIDENT',
+    NULL,
+    '2001/01/01',
+    5000,
+    1000,
+    10
+);
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    1111,
+    '성춘향',
+    'MANAGER',
+    9999,
+    '2002/01/05',
+    4000,
+    NULL,
+    10
+);
+
+--서브쿼리로 insert 구현
+--emp, salgrade 테이블 조인 후 급여 등급이 1인 사원만 emp_temp
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+)
+    SELECT
+        e.empno,
+        e.ename,
+        e.job,
+        e.hiredate,
+        e.sal,
+        e.comm,
+        e.deptno
+    FROM
+        emp      e,
+        salgrade s
+    WHERE
+        e.sal BETWEEN s.hisal AND s.losal
+        AND s.grade = 1;
+
+SELECT
+    *
+FROM
+    emp_temp;
+    
+--update : 테이블에 있는 데이터 수정
+
+--update 테이블명
+--set 변경할 열 이름 = 데이터,변경할 열 이름 = 데이터
+--where 변경을 위한 대상 행을 선벌하기 위한 조건
+
+SELECT
+    *
+FROM
+    dept_temp;
+
+--dept_temp loc 열의 모든 값을 seoul로 변경
+UPDATE dept_temp
+SET
+    loc = 'SEOUL';
+
+ROLLBACK;
+
+UPDATE dept_temp
+SET
+    loc = 'SEOUL'
+WHERE
+    deptno = 40;
+
+UPDATE dept_temp
+SET
+    dname = 'SALES',
+    loc = 'CHICAGO'
+WHERE
+    deptno = 80;
+
+UPDATE emp_temp
+SET
+    comm = 50
+WHERE
+    sal <= 2500;
+
+
+--서브쿼리를 사용ㅎ여 수정
+
+UPDATE dept_temp
+SET
+    ( dname,
+      loc ) = (
+        SELECT
+            dname,
+            loc
+        FROM
+            dept
+        WHERE
+            deptno = 40
+    )
+WHERE
+    deptno = 40;
+
+COMMIT;
+
+--delete: 테이블에 있는 데이터 삭제
+CREATE TABLE emp_temp2
+    AS
+        SELECT
+            *
+        FROM
+            emp;
+
+DELETE FROM emp_temp2
+WHERE
+    job = 'MANAGER';
+
+DELETE emp_temp2
+WHERE
+    job = 'SALESMAN';
+
+ROLLBACK;
+
+--서브쿼리를 사용하여 삭제
+DELETE FROM emp_temp2
+WHERE
+    empno IN (
+        SELECT
+            e.empno
+        FROM
+            emp_temp2 e, salgrade  s
+        WHERE
+            e.sal BETWEEN s.losal AND s.hisal
+            AND e.deptno = 30
+    );
+
+SELECT
+    *
+FROM
+    emp_temp2;
+
+COMMIT;
+
+CREATE TABLE exam_emp
+    AS
+        SELECT
+            *
+        FROM
+            emp;
+
+CREATE TABLE exam_dept
+    AS
+        SELECT
+            *
+        FROM
+            emp;
+CREATE TABLE exam_salgrade
+    AS
+        SELECT
+            *
+        FROM
+            salgrade;  
+drop table ecam_emp; 
+
+commit;
+
+update exam_emp
+set deptno=70
+where sal>(select avg(sal) from exam_emp where deptno=50); 
+
+update exam_emp
+set sal = sal*1.1,deptno = 80
+where hiredate>(select min(hiredate)from exap_emp where deptno =60);
+
+delete from exam_emp
+where empno in(select empno from exam_emp,salgrade where sal between losal and hisal and grade=5);
+            
+            
+--트랜잭션 : 최소 수행 단위
+--트랜잭션 제어하는 구문 TCL : commit, rollback
+
+create table dept_tcl as select*from dept;
+
+insert into dept_tcl values(50,'DATABASE','SEOUL');
+
+UPDATE dept_tcl set loc = 'BUSAN' WHERE deptno=40;
+
+delete from dept_tcl where dname = 'RESEARCH';
+
+select *from dept_tcl;
+
+--트랜잭션 취소
+rollback;
+--트랜잭션 최종 반영
+commit;
+--세션: 어떤 활동을 위한 시간이나 기간
+--데이터베이스 세션: 데이터베이스 접속을 시작으로 관련작업 수행한 후 접속 종료
+
+
+
+
+
+
+
+
+
+
+
+

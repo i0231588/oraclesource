@@ -303,23 +303,28 @@ WHERE
 
 select employee_id,last_name
 from employees
-where department_id = any(SELECT department_id from employees where last_name like '%u%');
+where department_id = any(SELECT distinct department_id from employees where last_name like '%u%');
 
 select last_name, job_id,salary
 from employees
-where salary > ANY(select salary from employees where job_id='SA_MAN');
+where salary > ANY(select max(salary) from employees where job_id='SA_MAN');
 
 select last_name, department_id,salary
 from employees
-where salary = some(select salary from employees where commission_pct is not null);
+where (department_id,salary) in (select department_id,salary from employees where commission_pct>0);
 
 select  employee_id, last_name, salary
 from employees
-where job_id = any(select job_id from employees where last_name like '%u%') and salary>(select avg(salary) from employees);
+where employee_id = any(select employee_id from employees where last_name like '%u%') and salary>(select avg(salary) from employees);
 
 
+select last_name, hire_date
+from employees
+where hire_date > (select hire_date from employees where last_name='Davies');
 
-
+select last_name, salary
+from employees
+where manager_id in (select manager_id from employees where last_name = 'King');
 
 
 
