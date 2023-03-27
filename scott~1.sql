@@ -1461,56 +1461,600 @@ CREATE TABLE exam_dept
             *
         FROM
             emp;
+
 CREATE TABLE exam_salgrade
     AS
         SELECT
             *
         FROM
-            salgrade;  
-drop table ecam_emp; 
+            salgrade;
 
-commit;
+DROP TABLE ecam_emp;
 
-update exam_emp
-set deptno=70
-where sal>(select avg(sal) from exam_emp where deptno=50); 
+COMMIT;
 
-update exam_emp
-set sal = sal*1.1,deptno = 80
-where hiredate>(select min(hiredate)from exap_emp where deptno =60);
+UPDATE exam_emp
+SET
+    deptno = 70
+WHERE
+    sal > (
+        SELECT
+            AVG(sal)
+        FROM
+            exam_emp
+        WHERE
+            deptno = 50
+    );
 
-delete from exam_emp
-where empno in(select empno from exam_emp,salgrade where sal between losal and hisal and grade=5);
+UPDATE exam_emp
+SET
+    sal = sal * 1.1,
+    deptno = 80
+WHERE
+    hiredate > (
+        SELECT
+            MIN(hiredate)
+        FROM
+            exap_emp
+        WHERE
+            deptno = 60
+    );
+
+DELETE FROM exam_emp
+WHERE
+    empno IN (
+        SELECT
+            empno
+        FROM
+            exam_emp, salgrade
+        WHERE
+            sal BETWEEN losal AND hisal
+            AND grade = 5
+    );
             
             
 --트랜잭션 : 최소 수행 단위
 --트랜잭션 제어하는 구문 TCL : commit, rollback
 
-create table dept_tcl as select*from dept;
+CREATE TABLE dept_tcl
+    AS
+        SELECT
+            *
+        FROM
+            dept;
 
-insert into dept_tcl values(50,'DATABASE','SEOUL');
+INSERT INTO dept_tcl VALUES (
+    50,
+    'DATABASE',
+    'SEOUL'
+);
 
-UPDATE dept_tcl set loc = 'BUSAN' WHERE deptno=40;
+UPDATE dept_tcl
+SET
+    loc = 'BUSAN'
+WHERE
+    deptno = 40;
 
-delete from dept_tcl where dname = 'RESEARCH';
+DELETE FROM dept_tcl
+WHERE
+    dname = 'RESEARCH';
 
-select *from dept_tcl;
+SELECT
+    *
+FROM
+    dept_tcl;
 
 --트랜잭션 취소
-rollback;
+ROLLBACK;
 --트랜잭션 최종 반영
-commit;
+COMMIT;
 --세션: 어떤 활동을 위한 시간이나 기간
 --데이터베이스 세션: 데이터베이스 접속을 시작으로 관련작업 수행한 후 접속 종료
 
 
+--DDL: 데이터 정의어
+--1. 테이블 생성
+--create table 테이블명(
+--열이름1 자료형
+--열이름2 자료형
+--열이름3 자료형
+--열이름4 자료형
+--);
+
+--테이블 생성 규칙
+--1) 테이블 이름은 문자로 시작
+--2) 테이블 이름은 30BYTE 이하
+--3 같은 사용자 소유의 테이블 이름은 중복될 수 없음
+--4) 테이블 명에 사용할 수 있는 특수문자는 $,#,_ 가능
+--5) SQL 키워드(ex SELECT,FROM,WHERE 등등) 는 테이블명에 사용할 수 없음
+
+--자료형
+--varchar2(길이) : 가변 길이 문자열 데이터 저장
+--CHAR(길이) : 고정 길이 문자열 데이터 저장
+--NVASRCHAR2(길이): 가변길이(unicode) 데이터 저장
+--     name varchar2(10) : 영어는 10자 한글은 3자까지 입력
+--     name nvarchar2(10) : 영어 10자 한글 10자까지 입력
+--NCHAR(길이) : 고정길이(unicode)
+--     name char2(10) : 영어는 10자, 한글은 3자,+메모리 10byte 고정
+--     name nchar2(10) : 영어는 10자, 한글은 10자,+메모리 10byte 고정
+--2 숫자
+-- NUMBER(전체 자릿수, 소수점이하자릿수)
+
+--3 날짜
+--DATE: 날짜,시간 저장
+--TIMESTAMP
+
+--4 기타
+--BLOB: 대용량 이진 데이터 저장
+--CLOB: 대용량 텍스트 데이터 저장
+--JSON: JSON 데이터 저장
+
+CREATE TABLE emp_ddl (
+    empno    NUMBER(4), --사번 총 4자리 지정
+    ename    VARCHAR2(10), --사원명을 총 10byte로 지정
+    job      VARCHAR2(9), --직무 총 9byte지정
+    mgr      NUMBER(4), --매니저 번호
+    hiredate DATE, --날짜/시간 저장
+    sal      NUMBER(7, 2), --급여를 전체 자릿수 7자리 지정(소수점 2자리까지 허용)
+    comm     NUMBER(7, 2), --추가수당
+    deptno   NUMBER(2) -- 부서번호
+);
+
+desc emp_ddl;
 
 
+--2. 테이블 수정 :alter
+--1) 열 추가: add
+ALTER TABLE emp_temp2 ADD hp VARCHAR2(20);
+--2)열 이름 변경 : RENAME
+ALTER TABLE emp_temp2 RENAME COLUMN hp TO tel;
 
 
+--3)열 자료형 길이 변경: MODIFY
+ALTER TABLE emp_temp2 MODIFY
+    empno NUMBER(5);
+
+--4) 특정 열 삭제 : DROP
+ALTER TABLE emp_temp2 DROP COLUMN tel;
 
 
+--3. 테이블 삭제
+DROP TABLE emp_rename;
+
+--테이블 명 변경
+RENAME emp_temp2 TO emp_rename;
+
+--테이블 데이터 전체 삭제
+DELETE FROM emp_rename;
+
+SELECT
+    *
+FROM
+    emp_rename;
+
+ROLLBACK;
+
+--rollback 안됨
+TRUNCATE TABLE emp_rename;
+
+CREATE TABLE member (
+    id     CHAR(8),
+    name   VARCHAR2(10),
+    addr   VARCHAR2(50),
+    nation CHAR(4),
+    email  VARCHAR2(50),
+    age    NUMBER(7, 2)
+);
+
+ALTER TABLE member ADD bigo VARCHAR2(20);
+
+ALTER TABLE member MODIFY
+    bigo NUMBER(30);
+
+ALTER TABLE member RENAME COLUMN bigo TO remark;
+
+DROP TABLE member;
+
+CREATE TABLE member (
+    id     CHAR(8),
+    name   VARCHAR2(10),
+    addr   VARCHAR2(50),
+    nation NCHAR(4),
+    email  VARCHAR2(50),
+    age    NUMBER(7, 2)
+);
+
+INSERT INTO member VALUES (
+    'hong1234',
+    '홍길동',
+    '서울시 구로구 개봉동',
+    '대한민국',
+    'hong123@naver.com',
+    25,
+    NULL
+);
+
+--데이터 베이스 객체
+--테이블, 인덱스, 뷰, 데이터 사전, 시퀀스, 시노님, 프로시저, 함수, 패키지, 트리거
+--생성 : create, 수정: alter, 삭제 : drop
+
+--인덱스 : 더 빠른 검색을 도와줌
+--인덱스 : 사용자가 직접 특정 테이블 열에 지정 가능
+--        기본키(혹은 unique key)를 생성하면 인덱스로 지정
+
+--create index 인덱스 이름 on 테이블명(인덱스로 사용할 열이름)
+
+CREATE INDEX idx_sal ON
+    emp (
+        sal
+    );
+
+--select : 검색방식
+--FULL Scan
+--Index Scan
+
+SELECT
+    *
+FROM
+    emp
+WHERE
+    empno = 7900;
+    
+--인덱스 삭제
+DROP INDEX idx_emp_sal;
+
+--View : 가상 테이블
+-- 편리성 : select문의 복잡도를 완화하기 위해
+-- 보안성 : 테이블의 특정 열을 노출하고 싶지 않을 때
+
+-- CREATE[OR REPLACE] [FORCE | NOFORCE] VIEW 뷰이름(열이름1,열이름2,..)
+-- AS (저장할 SELECT 구문)
+--[WITH CHECK OPTION]
+--[WITH READ ONLY]
 
 
+--select empno,ename,job,deptno from emp where deptno=20 뷰로 생성
+CREATE VIEW vm_emp20 AS
+    ( SELECT
+        empno,
+        ename,
+        job,
+        deptno
+    FROM
+        emp
+    WHERE
+        deptno = 20
+    );
+
+--서브쿼리를 이용
+SELECT
+    *
+FROM
+    (
+        SELECT
+            empno,
+            ename,
+            job,
+            deptno
+        FROM
+            emp
+        WHERE
+            deptno = 20
+    );
+
+--뷰 사용
+SELECT
+    *
+FROM
+    vm_emp20; 
+
+--뷰 삭제
+DROP VIEW vm_emp20;
+
+CREATE VIEW vm_emp_read AS
+    SELECT
+        empno,
+        ename,
+        job
+    FROM
+        emp
+WITH READ ONLY;
+
+--VIEW에 INSERT 작업이 가능한가
+INSERT INTO vm_emp20 VALUES (
+    8888,
+    'KIM',
+    'SALES',
+    20
+);
+--원본 변경이 일어남
+SELECT
+    *
+FROM
+    emp;
+
+--읽기 전용 뷰에서는 DML 작업을 수행 못함
+INSERT INTO vm_emp_read VALUES (
+    9999,
+    'KIM',
+    'SALES'
+);
+
+--인라인 뷰 : 일회성으로 만들어서 사용하는 뷰
+--rownum
+
+SELECT
+    ROWNUM,
+    e.*
+FROM
+    emp e;
+
+SELECT
+    ROWNUM,
+    e.*
+FROM
+    (
+        SELECT
+            *
+        FROM
+            emp e
+        ORDER BY
+            sal DESC
+    ) e
+WHERE
+    ROWNUM <= 3;
+
+--시퀀스 : 규칙에 따라 순번 생성
+--create sequence 시퀀스 이름;(설정안하는 것들은 다 기본값으로 세팅)
+
+--create sequence 시퀀스명
+--[increment by 숫자] 기본값 1
+--[start with 숫자] 기본값 1
+--[maxvalue 숫자 | nomaxvalue]
+--[minvalue 숫자 | nominvalue]
+--[cycle | nocycle] cycle인 경우 maxvalue에 값이 다다르면 시작값부터 다시 시작
+--[cache 숫자 | nocache] 시퀀스가 생성할 번호를 미리 메모리에 할당해 놓음(기본 cache 20)
+
+CREATE TABLE dept_sequence
+    AS
+        SELECT
+            *
+        FROM
+            dept
+        WHERE
+            1 <> 1;
+
+CREATE SEQUENCE seq_dept_sequence INCREMENT BY 10 START WITH 10 MAXVALUE 90 MINVALUE 0 NOCYCLE CACHE 2;
+
+--시퀀스 사용 : 시퀀스 이름.CURRVAL(마지막으로 생성된 시퀀스 조회), 시퀀스이름.NEXTVAL(시퀀스 생성)
+INSERT INTO dept_sequence (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    seq_dept_sequence.NEXTVAL,
+    'DATABASE',
+    'SEOUL'
+);
+--시퀀스 삭제
+DROP SEQUENCE seq_dept_sequence;
+
+CREATE SEQUENCE seq_dept_sequence INCREMENT BY 3 START WITH 10 MAXVALUE 99 MINVALUE 0 CYCLE CACHE 2;
+
+SELECT
+    *
+FROM
+    dept_sequence;
+
+SELECT
+    seq_dept_sequence.CURRVAL
+FROM
+    dual;
+
+--synonym(동의어) : 테이블, 뷰, 시퀀스, 등 객체 이름 대신 사용할 수 있는 다른 이름을 부여하는 객체
+
+CREATE SYNONYM e FOR emp;
+
+SELECT
+    *
+FROM
+    emp;
+
+SELECT
+    *
+FROM
+    e;
+
+DROP SYNONYM e;
+
+CREATE TABLE empidx
+    AS
+        SELECT
+            *
+        FROM
+            emp;
+
+CREATE INDEX idx_empidx_empno ON
+    empidx (
+        empno
+    );
+
+SELECT
+    *
+FROM
+    user_indexes;
+
+CREATE VIEW empidx_over15k AS
+    ( SELECT
+        empno,
+        ename,
+        job,
+        deptno,
+        sal,
+        comm
+    FROM
+        empidx
+    WHERE
+        sal > 1500
+    );
+
+CREATE TABLE deptseq
+    AS
+        SELECT
+            *
+        FROM
+            dept;
+
+CREATE SEQUENCE seq_dept_sequence INCREMENT BY 1 START WITH 1 MAXVALUE 99 MINVALUE 1 NOCYCLE NOCACHE;
+
+SELECT
+    *
+FROM
+    user_sequences;
+
+--계약조건
+--테이블의 특정 열에 지정
+--NULL 허용/ 불허용, 유일한 값, 조건식을 만족하는 데이터만 입력가능
+--데이터 무결성(데이터 정확성,일관성 보장)유지 ==> DML 작업 시 지켜야 함
+--영역 무결성, 개체 무결성, 참조 무결성
+--테이블 생성 시 제약조건 지정, OR 생성 후에 ALTER를 통해 추가, 변경 가능
+
+--`NOT NULL: 빈 값 허용 불가
+
+CREATE TABLE table_nutnull (
+    login_id  VARCHAR2(20) NOT NULL,
+    login_pwd VARCHAR2(20) NOT NULL,
+    tel       VARCHAR2(20)
+);
+
+--전체 제약조건 조회
+SELECT * 
+FROM user_constraints;
+
+--제약조건 + 제약조건 명 지정
+CREATE TABLE table_nutnull2 (
+    login_id  VARCHAR2(20) constraint TBLNN2_LOGIN_NN NOT NULL,
+    login_pwd VARCHAR2(20) constraint TBLNN2_LOPWD_NN NOT NULL,
+    tel       VARCHAR2(20)
+);
+
+--생성한 테이블에 제약조건 추가
+ALTER TABLE TABLE_NOTNULL MODIFY(TEL NOT NULL);
+ALTER TABLE TABLE_NOTNULL2 MODIFY(TEL constraint TBLNN2_TEL_NN NOT NULL);
+
+UPDATE TABLE_NOTNULL
+SET TEL = '01012345678'
+WHERE LOGIN_ID = 'hong123';
+
+--제약조건 명 변경
+ALTER TABLE TABLE_NOTNULL2 RENAME CONSTRAINT TBLNN2_TEL_NN TO TBLNN3_TEL_NN;
+
+--제약조건 명 삭제
+ALTER TABLE TABLE_NOTNULL2 DROP CONSTRAINT TBLNN3_TEL_NN;
+
+--2UNIQUE : 중복되지 않는 값 (null은 가능)
+--          아이디, 전화번호 등
+
+CREATE TABLE table_UNIQUE (
+    login_id  VARCHAR2(20) UNIQUE,
+    login_pwd VARCHAR2(20) NOT NULL,
+    tel       VARCHAR2(20)
+);
+INSERT INTO table_unique(
+login_id,
+login_pwd,
+tel)
+values('hong123','hong123','010-1234-5678');
+
+select*from table_unique;
+
+--3)PRIMARY KEY : UNIQUE + NOT NULL
+
+CREATE TABLE table_PRIMARY (
+    login_id  VARCHAR2(20) PRIMARY KEY,
+    login_pwd VARCHAR2(20) NOT NULL,
+    tel       VARCHAR2(20)
+);
+
+--PRIMARY KEY ==> INDEX 자동 생성
+
+INSERT INTO table_PRIMARY(
+login_id,
+login_pwd,
+tel)
+values('hong123','hong123','010-1234-5678');
+
+--4) 외래키 : FOREIGN KEY : 다른 테이블 간 관계를 정의하는데 사용
+--           특정 테이블에서 PRIMARY KEY 제약조건을 지정한 열을 다른 테이블의 특정 열에서 참조
+--사원 추가 시 부서 번호 입력을 해야 함 => DEPT 테이블의 DEPTNO만 삽입
+
+CREATE TABLE DEPT_FK(
+DEPTNO NUMBER(2) CONSTRAINT DEPTFK_DEPTNO_PK PRIMARY KEY,
+DNAME VARCHAR2(14),
+LOC VARCHAR2(13)
+);
+--REFERENCES 참조할 테이블명(참조할 열) ==> 외래키 지정 방법
+CREATE TABLE EMP_FK(
+EMPNO NUMBER(4) CONSTRAINT EMPFK_EMPNO_PK PRIMARY KEY,
+ENAME VARCHAR2(10),
+JOB VARCHAR2(9),
+DEPTNO NUMBER(2) CONSTRAINT EMPFK_DEPTNO_FK REFERENCES DEPT_FK(DEPTNO));
+
+
+INSERT INTO EMP_FK values(1000,'TEST','SALES',10);
+--외래키 제약조건
+--부모 테이블 데이터가 데이터 먼저 입력 
+
+--삭제 시
+--자식 테이블 데이터 먼저 삭제
+--부모 테이블 데이터 삭제
+INSERT INTO DEPT_FK VALUES(10,'EATABASE','SEOUL');
+
+DELETE FROM DEPT_FK WHERE DEPTNO=10;
+
+--외래키 제약조건 옵션
+--ON DELETE CASCADE
+--ON DELETE SET NULL
+
+CREATE TABLE DEPT_FK2(
+DEPTNO NUMBER(2) CONSTRAINT DEPTFK_DEPTNO_PK2 PRIMARY KEY,
+DNAME VARCHAR2(14),
+LOC VARCHAR2(13)
+);
+
+CREATE TABLE EMP_FK2(
+EMPNO NUMBER(4) CONSTRAINT EMPFK_EMPNO_PK2 PRIMARY KEY,
+ENAME VARCHAR2(10),
+JOB VARCHAR2(9),
+DEPTNO NUMBER(2) CONSTRAINT EMPFK_DEPTNO_FK2 REFERENCES DEPT_FK2(DEPTNO)ON DELETE CASCADE);
+
+INSERT INTO DEPT_FK2 VALUES(10,'DATABASE','SEOUL');
+INSERT INTO EMP_FK2 values(1000,'TEST','SALES',10);
+
+DELETE FROM DEPT_FK2 WHERE DEPTNO=10;
+
+--5 CHECK 제약조건
+--비밀번호는 3자리보다 커야한다
+
+CREATE TABLE table_CHECK (
+    login_id  VARCHAR2(20) PRIMARY KEY,
+    login_pwd VARCHAR2(20) CHECK (LENGTH(LOGIN_PWD)>3),
+    tel       VARCHAR2(20)
+);
+INSERT INTO TABLE_CHECK VALUES('TEST','123','01012345678');
+
+INSERT INTO TABLE_CHECK VALUES('TEST','1234','01012345678');
+
+--6 DEFAULT : 기본값 지정
+
+CREATE TABLE table_DEFAULT (
+    login_id  VARCHAR2(20) PRIMARY KEY,
+    login_pwd VARCHAR2(20) DEFAULT '1234',
+    tel       VARCHAR2(20)
+);
+INSERT INTO TABLE_DEFAULT VALUES('TEST',NULL,'01012345678');
+INSERT INTO TABLE_DEFAULT(login_id,tel) VALUES('TEST1','01012345678');
+
+SELECT * FROM TABLE_DEFAULT;
 
 
